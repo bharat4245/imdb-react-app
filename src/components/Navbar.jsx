@@ -7,7 +7,7 @@ const Navbar = () => {
     <div className="flex border space-x-8 item-center pl-3 py-4">
       <img src={Logo} alt="" className="w-[50px]" />
       <Link to="/" className="text-blue-500 text-3xl font-bold">
-        Movies
+        Movie
       </Link>
       <Link to="/watchlist" className="text-blue-500 text-3xl font-bold">
         Watchlist
