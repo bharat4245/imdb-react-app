@@ -7,40 +7,44 @@ on:
 
 jobs:
   deploy:
+    name: Build and Deploy to AWS
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      # 🧩 Step 1 — Checkout Code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 🧩 Step 2 — Setup Node
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      # 🧩 Step 3 — Install Dependencies
       - name: Install dependencies
         run: npm ci
 
+      # 🧩 Step 4 — Build React App
       - name: Build Vite app
         run: npm run build
 
-      - name: Deploy to S3
-        uses: aws-actions/s3-sync@v2
+      # 🧩 Step 5 — Configure AWS Credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          bucket: imdb-react-app
-          region: ap-south-1
-          source: dist
-          delete: true
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Invalidate CloudFront Cache
-        uses: chetan/invalidate-cloudfront-action@v2
-        with:
-          distribution: EE30E0B2ZNFNZ
-          paths: "/*"
-        env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      # 🧩 Step 6 — Deploy to S3
+      - name: Sync build files to S3
+        run: |
+          aws s3 sync dist s3://imdb-react-app --delete
+
+      # 🧩 Step 7 — Invalidate CloudFront Cache
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id EE30E0B2ZNFNZ \
+            --paths "/*"
