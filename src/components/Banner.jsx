@@ -9,7 +9,7 @@ const Banner = () => {
       }}
     >
       <div className="text-white text-2xl text-center w-full bg-gray-900/60 p-4">
-        Ghayal - Once Again
+        KGF
       </div>
     </div>
   );
